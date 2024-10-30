@@ -7,12 +7,14 @@ public class Pathfinding : MonoBehaviour
     public int GridWidth, GridHeight;
     public float Probability;
 
+    [Header("New Start Pos")]
+    [SerializeField] private Vector2Int newStart;
+    [Header("New Goal Pos")]
+    [SerializeField] private Vector2Int newGoal;
     [Header("The coordinates I want to change")]
     [SerializeField] public Vector2Int CoordToChange;
 
     private List<Vector2Int> path = new List<Vector2Int>();
-    private Vector2Int startTemp = new Vector2Int(0, 1);
-    private Vector2Int goalTemp = new Vector2Int(4, 4);
     private Vector2Int start = new Vector2Int(0, 1);
     private Vector2Int goal = new Vector2Int(4, 4);
     private Vector2Int next;
@@ -37,9 +39,9 @@ public class Pathfinding : MonoBehaviour
     };
     private void Start()
     {
-        startTemp =start;
-        goalTemp = goal;
-        GenerateRandomGrid(GridWidth,GridHeight,Probability);
+        newStart = start;
+        newGoal = goal;
+        GenerateRandomGrid(GridWidth, GridHeight, Probability);
     }
     private void Update()
     {
@@ -47,18 +49,18 @@ public class Pathfinding : MonoBehaviour
     }
     private void GenerateRandomGrid(int width, int height, float obstacleProbability)
     {
-        for(int y = 0; y < height ; y++)
+        for (int y = 0; y < height; y++)
         {
-            for(int x = 0; x < width ; x++)
+            for (int x = 0; x < width; x++)
             {
                 grid[x, y] = RandomCheck(obstacleProbability);
             }
         }
-       
+
     }
     private int RandomCheck(float chance)
     {
-        if(chance < Random.Range(0, 10))
+        if (chance < Random.Range(0, 10))
         {
             return 0;
         }
@@ -140,24 +142,22 @@ public class Pathfinding : MonoBehaviour
         path.Add(start);
         path.Reverse();
     }
-    private void ClearPath()
+    public void ClearPath()
     {
-        if (startTemp != start || goalTemp != goal) 
-        { 
-            path.Clear(); 
-            startTemp = start;
-            goalTemp = goal;
-        }
-        else
-        {
-            path.Clear();
-        }
-
+        newStart = start;
+        newGoal = goal;
+        path.Clear();
     }
-   
+
+    public void UpdatePositions()
+    {
+        start = newStart;
+        goal = newGoal;
+    }
+
     public void AddObstacle(Vector2Int obstacle)
     {
-        if (grid[obstacle.x, obstacle.y] ==1)
+        if (grid[obstacle.x, obstacle.y] == 1)
         {
             grid[obstacle.x, obstacle.y] = 0;
             ClearPath();
@@ -167,21 +167,23 @@ public class Pathfinding : MonoBehaviour
             grid[obstacle.x, obstacle.y] = 1;
             ClearPath();
         }
-        
     }
 
 }
 [CustomEditor(typeof(Pathfinding)), CanEditMultipleObjects]
 public class PathFindingEditor : Editor
 {
-    
-
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-
-
         Pathfinding myScript = (Pathfinding)target;
+
+        if (GUILayout.Button("Change positions"))
+        {
+            myScript.UpdatePositions();
+            myScript.ClearPath();
+        }
+
         if (GUILayout.Button("Add/remove Obstacle"))
         {
             myScript.AddObstacle(myScript.CoordToChange);
