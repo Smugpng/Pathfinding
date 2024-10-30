@@ -1,12 +1,18 @@
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 public class Pathfinding : MonoBehaviour
 {
     public int GridWidth, GridHeight;
     public float Probability;
 
+    [Header("The coordinates I want to change")]
+    [SerializeField] public Vector2Int CoordToChange;
 
     private List<Vector2Int> path = new List<Vector2Int>();
+    private Vector2Int startTemp = new Vector2Int(0, 1);
+    private Vector2Int goalTemp = new Vector2Int(4, 4);
     private Vector2Int start = new Vector2Int(0, 1);
     private Vector2Int goal = new Vector2Int(4, 4);
     private Vector2Int next;
@@ -31,7 +37,12 @@ public class Pathfinding : MonoBehaviour
     };
     private void Start()
     {
+        startTemp =start;
+        goalTemp = goal;
         GenerateRandomGrid(GridWidth,GridHeight,Probability);
+    }
+    private void Update()
+    {
         FindPath(start, goal);
     }
     private void GenerateRandomGrid(int width, int height, float obstacleProbability)
@@ -41,7 +52,6 @@ public class Pathfinding : MonoBehaviour
             for(int x = 0; x < width ; x++)
             {
                 grid[x, y] = RandomCheck(obstacleProbability);
-                Debug.Log(grid[x, y]);
             }
         }
        
@@ -129,5 +139,52 @@ public class Pathfinding : MonoBehaviour
         }
         path.Add(start);
         path.Reverse();
+    }
+    private void ClearPath()
+    {
+        if (startTemp != start || goalTemp != goal) 
+        { 
+            path.Clear(); 
+            startTemp = start;
+            goalTemp = goal;
+        }
+        else
+        {
+            path.Clear();
+        }
+
+    }
+   
+    public void AddObstacle(Vector2Int obstacle)
+    {
+        if (grid[obstacle.x, obstacle.y] ==1)
+        {
+            grid[obstacle.x, obstacle.y] = 0;
+            ClearPath();
+        }
+        else
+        {
+            grid[obstacle.x, obstacle.y] = 1;
+            ClearPath();
+        }
+        
+    }
+
+}
+[CustomEditor(typeof(Pathfinding)), CanEditMultipleObjects]
+public class PathFindingEditor : Editor
+{
+    
+
+    public override void OnInspectorGUI()
+    {
+        base.OnInspectorGUI();
+
+
+        Pathfinding myScript = (Pathfinding)target;
+        if (GUILayout.Button("Add/remove Obstacle"))
+        {
+            myScript.AddObstacle(myScript.CoordToChange);
+        }
     }
 }
