@@ -41,6 +41,8 @@ public class Pathfinding : MonoBehaviour
     {
         newStart = start;
         newGoal = goal;
+        grid[newStart.x, newStart.y] = 0;
+        grid[newGoal.x, newGoal.y] = 0;
         GenerateRandomGrid(GridWidth, GridHeight, Probability);
     }
     private void Update()
@@ -153,6 +155,8 @@ public class Pathfinding : MonoBehaviour
     {
         start = newStart;
         goal = newGoal;
+        grid[newStart.x, newStart.y] = 0;
+        grid[newGoal.x, newGoal.y] = 0;
     }
 
     public void AddObstacle(Vector2Int obstacle)
